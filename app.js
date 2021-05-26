@@ -2,6 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const ejs = require('ejs');
 const path = require('path');
+const fs = require('fs');
 
 const storage = multer.diskStorage({
     destination: './public/uploads/',
@@ -47,12 +48,19 @@ app.post('/upload', (req, res) => {
                 msg: err
             });
         } else {
-            if (req.file == undefined)
-            {
+            if (req.file == undefined) {
                 res.render('index', {
                     msg: "Error: Upload a file first!"
                 });
-            } else{
+            } else {
+                setTimeout(function () {
+                    fs.unlink(`public/uploads/${req.file.filename}`, (err) => {
+                        if (err) {
+                            console.error(err)
+                            return
+                        }
+                    });
+                }, 1000 * 60 * 60);
                 res.render('index', {
                     msg: 'File Uploaded!',
                     file: `uploads/${req.file.filename}`
