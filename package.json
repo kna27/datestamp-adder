@@ -1,0 +1,24 @@
+{
+  "name": "datestamp-adder",
+  "version": "1.0.0",
+  "description": "Add datestamp to images",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kna27/datestamp-adder.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kna27/datestamp-adder/issues"
+  },
+  "homepage": "https://github.com/kna27/datestamp-adder#readme",
+  "dependencies": {
+    "ejs": "^3.1.6",
+    "express": "^4.17.1",
+    "multer": "^1.4.2"
+  }
+}
