@@ -4,6 +4,7 @@ const multer = require('multer');
 const ejs = require('ejs');
 const path = require('path');
 const fs = require('fs');
+var ExifImage = require('exif').ExifImage;
 
 // Name the uploaded files and state their destination 
 const storage = multer.diskStorage({
@@ -17,7 +18,7 @@ const storage = multer.diskStorage({
 // State the max file size
 const upload = multer({
     storage: storage,
-    limits: { fileSize: 1000000 },
+    limits: { fileSize: 10000000 },
     fileFilter: function (req, file, cb) {
         checkFileType(file, cb);
     }
@@ -82,6 +83,19 @@ app.post('/upload', (req, res) => {
                     msg: 'File Uploaded!',
                     file: `uploads/${req.file.filename}`
                 })
+
+                //------------------------------
+                try {
+                    new ExifImage({ image : `public/uploads/${req.file.filename}` }, function (error, exifData) {
+                        if (error)
+                            console.log('Error: '+error.message);
+                        else
+                            console.log(exifData); // Do something with your data!
+                    });
+                } catch (error) {
+                    console.log('Error: ' + error.message);
+                }
+                
             }
         }
     })
