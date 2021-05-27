@@ -1,3 +1,5 @@
+// The file that gets displayed to the user
+
 <!DOCTYPE html>
 
 <html lang="en">
@@ -12,13 +14,20 @@
 <body>
     <h1>Datestamp Adder</h1>
     <h2>Upload an image, and then a datestamp will get added</h2>
-    <%= typeof msg != 'undefined' ? msg : ''%>
-    <form action="/upload" method="POST" enctype="multipart/form-data">
-        <input type="file" name="imageField" />
-        <button type="submit">Submit</button>
-    </form>
-    <br>
-    <img src="<%= typeof file != 'undefined' ? file : ''%>" class="responsive-img">
+
+    // The message that gets displayed about the status of the uploaded file
+    <%= typeof msg !='undefined' ? msg : '' %>
+
+        // The form buttons
+        <form action="/upload" method="POST" enctype="multipart/form-data">
+            // The file upload input
+            <input type="file" name="imageField" />
+            // The submit button
+            <button type="submit">Submit</button>
+        </form>
+        <br>
+        // The image that gets displayed to the user
+        <img src="<%= typeof file != 'undefined' ? file : ''%>" class="responsive-img">
 </body>
 
 </html>
