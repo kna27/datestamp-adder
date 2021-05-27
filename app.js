@@ -90,7 +90,7 @@ app.post('/upload', (req, res) => {
                         if (error)
                             console.log('Error: '+error.message);
                         else
-                            console.log(exifData); // Do something with your data!
+                            console.log(exifData.image.ModifyDate); // Do something with your data!
                     });
                 } catch (error) {
                     console.log('Error: ' + error.message);
