@@ -13,7 +13,7 @@ let dateNow = Date.now();
 // Name the uploaded files and state their destination 
 const storage = multer.diskStorage({
     destination: './public/uploads/',
-    filename: function (req, file, cb) {
+    filename: function(req, file, cb) {
         // Add the current date to the image's name to prevent conflicting files
         cb(null, file.fieldname + '-' + dateNow + path.extname(file.originalname));
     }
@@ -23,23 +23,26 @@ const storage = multer.diskStorage({
 const upload = multer({
     storage: storage,
     limits: { fileSize: 10000000 },
-    fileFilter: function (req, file, cb) {
+    fileFilter: function(req, file, cb) {
         checkFileType(file, cb);
     }
 }).single('imageField')
 
 // Only allow image files
 function checkFileType(file, cb) {
-    const filetypes = /jpeg|jpg|png|gif/;
+    const filetypes = /jpeg|jpg/;
     const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
 
     const minetype = filetypes.test(file.mimetype);
 
     if (minetype && extname) {
         return cb(null, true);
-    }
-    else {
-        cb("Error: Images Only!");
+    } else {
+        if (path.extname(file.originalname) == ".png") {
+            cb("Error: only JPG and JPEG files are supported!");
+        } else {
+            cb("Error: Images Only!");
+        }
     }
 }
 
@@ -64,8 +67,7 @@ app.post('/upload', (req, res) => {
             res.render('index', {
                 msg: err
             });
-        }
-        else {
+        } else {
             // If the user didn't upload a file
             if (req.file == undefined) {
                 res.render('index', {
@@ -75,7 +77,7 @@ app.post('/upload', (req, res) => {
             // If the file uploaded successfully
             else {
                 // Delete the file after one hour
-                setTimeout(function () {
+                setTimeout(function() {
                     fs.unlink(`public/uploads/${req.file.filename}`, (err) => {
                         if (err) {
                             console.error(err)
@@ -95,18 +97,17 @@ app.post('/upload', (req, res) => {
                 // read image metadata, narrow down to only the date/time
 
                 try {
-                    new ExifImage({ image : picture }, function (error, exifData) {
+                    new ExifImage({ image: picture }, function(error, exifData) {
                         if (error) {
-                            console.log(picture +' | Error: '+error.message);
-                        }
-                        else
-                            console.log(exifData.image.ModifyDate); 
+                            console.log(picture + ' | Error: ' + error.message);
+                        } else
+                            console.log(exifData.image.ModifyDate);
                     });
                 } catch (error) {
-                    console.log( 'Error: ' + error.message);
+                    console.log('Error: ' + error.message);
                 }
-                
-                
+
+
             }
         }
     })
