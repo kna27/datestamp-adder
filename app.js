@@ -5,13 +5,17 @@ const ejs = require('ejs');
 const path = require('path');
 const fs = require('fs');
 var ExifImage = require('exif').ExifImage;
+const Jimp = require("jimp");
+const { networkInterfaces } = require('os');
+
+let dateNow = Date.now();
 
 // Name the uploaded files and state their destination 
 const storage = multer.diskStorage({
     destination: './public/uploads/',
     filename: function (req, file, cb) {
         // Add the current date to the image's name to prevent conflicting files
-        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+        cb(null, file.fieldname + '-' + dateNow + path.extname(file.originalname));
     }
 })
 
@@ -51,6 +55,7 @@ app.use(express.static(__dirname + '/public'));
 // Show the /views/index.ejs file to the user
 app.get('/', (req, res) => res.render('index'));
 
+
 // Uploading a file to the server
 app.post('/upload', (req, res) => {
     upload(req, res, (err) => {
@@ -84,17 +89,23 @@ app.post('/upload', (req, res) => {
                     file: `uploads/${req.file.filename}`
                 })
 
-                //------------------------------
+                let picture = `public/uploads/${req.file.filename}`;
+
+
+                // read image metadata, narrow down to only the date/time
+
                 try {
-                    new ExifImage({ image : `public/uploads/${req.file.filename}` }, function (error, exifData) {
-                        if (error)
-                            console.log('Error: '+error.message);
+                    new ExifImage({ image : picture }, function (error, exifData) {
+                        if (error) {
+                            console.log(picture +' | Error: '+error.message);
+                        }
                         else
-                            console.log(exifData.image.ModifyDate); // Do something with your data!
+                            console.log(exifData.image.ModifyDate); 
                     });
                 } catch (error) {
-                    console.log('Error: ' + error.message);
+                    console.log( 'Error: ' + error.message);
                 }
+                
                 
             }
         }
