@@ -1,3 +1,7 @@
+// Constants
+const fileSizeLimit = 10000000; // The limit on the file's size in bytes
+const fileLifeTime = 1000 * 60 * 60; // The time until the file is deleted from the server in milliseconds
+
 // Dependencies
 const express = require('express');
 const multer = require('multer');
@@ -6,7 +10,6 @@ const path = require('path');
 const fs = require('fs');
 var ExifImage = require('exif').ExifImage;
 const Jimp = require("jimp");
-const { networkInterfaces } = require('os');
 
 let dateNow = Date.now();
 
@@ -22,7 +25,7 @@ const storage = multer.diskStorage({
 // State the max file size
 const upload = multer({
     storage: storage,
-    limits: { fileSize: 10000000 },
+    limits: { fileSize: fileSizeLimit },
     fileFilter: function(req, file, cb) {
         checkFileType(file, cb);
     }
@@ -84,7 +87,7 @@ app.post('/upload', (req, res) => {
                             return
                         }
                     });
-                }, 1000 * 60 * 60);
+                }, fileLifeTime);
                 // Display the image on the website
                 res.render('index', {
                     msg: 'File Uploaded!',
