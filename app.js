@@ -65,20 +65,24 @@ app.get('/', (req, res) => res.render('index'));
 // Uploading a file to the server
 app.post('/upload', (req, res) => {
     upload(req, res, (err) => {
+
         // If there is an error
         if (err) {
             res.render('index', {
                 msg: err
             });
         } else {
+
             // If the user didn't upload a file
             if (req.file == undefined) {
                 res.render('index', {
                     msg: "Error: Upload a file first!"
                 });
             }
+
             // If the file uploaded successfully
             else {
+
                 // Delete the file after one hour
                 setTimeout(function() {
                     fs.unlink(`public/uploads/${req.file.filename}`, (err) => {
@@ -88,6 +92,7 @@ app.post('/upload', (req, res) => {
                         }
                     });
                 }, fileLifeTime);
+
                 // Display the image on the website
                 res.render('index', {
                     msg: 'File Uploaded!',
@@ -96,9 +101,7 @@ app.post('/upload', (req, res) => {
 
                 let picture = `public/uploads/${req.file.filename}`;
 
-
-                // read image metadata, narrow down to only the date/time
-
+                // Read image metadata, narrow down to only the date/time
                 try {
                     new ExifImage({ image: picture }, function(error, exifData) {
                         if (error) {
@@ -109,8 +112,6 @@ app.post('/upload', (req, res) => {
                 } catch (error) {
                     console.log('Error: ' + error.message);
                 }
-
-
             }
         }
     })
