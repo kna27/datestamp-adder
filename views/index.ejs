@@ -7,6 +7,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1.0" />
+    <link rel="icon" type="image/png" href="icon.png"/>
     <title>Datestamp Adder</title>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -18,16 +19,16 @@
     <!-- The message that gets displayed about the status of the uploaded file -->
     <%= typeof msg !='undefined' ? msg : '' %>
 
-        <!-- The form buttons -->
-        <form action="/upload" method="POST" enctype="multipart/form-data">
-            <!-- The file upload input -->
-            <input type="file" name="imageField" />
-            <!-- The submit button -->
-            <button type="submit">Submit</button>
-        </form>
-        <br>
-        <!-- The image that gets displayed to the user -->
-        <img src="<%= typeof file != 'undefined' ? file : ''%>" class="responsive-img">
+    <!-- The form buttons -->
+    <form action="/upload" method="POST" enctype="multipart/form-data">
+        <!-- The file upload input -->
+        <input type="file" name="imageField" />
+        <!-- The submit button -->
+        <button type="submit">Submit</button>
+    </form>
+    <br>
+    <!-- The image that gets displayed to the user -->
+    <img src="<%= typeof file != 'undefined' ? file : ''%>" class="responsive-img">
 </body>
 
 </html>
