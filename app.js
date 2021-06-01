@@ -1,6 +1,7 @@
 // Constants
 const fileSizeLimit = 10000000; // The limit on the file's size in bytes
 const fileLifeTime = 1000 * 60 * 60; // The time until the file is deleted from the server in milliseconds
+const uploadsPath = './public/uploads/';
 
 // Dependencies
 const express = require('express');
@@ -11,14 +12,12 @@ const fs = require('fs');
 var ExifImage = require('exif').ExifImage;
 const Jimp = require("jimp");
 
-let dateNow = Date.now();
-
 // Name the uploaded files and state their destination 
 const storage = multer.diskStorage({
-    destination: './public/uploads/',
-    filename: function(req, file, cb) {
+    destination: uploadsPath,
+    filename: function (req, file, cb) {
         // Add the current date to the image's name to prevent conflicting files
-        cb(null, file.fieldname + '-' + dateNow + path.extname(file.originalname));
+        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
     }
 })
 
@@ -26,7 +25,7 @@ const storage = multer.diskStorage({
 const upload = multer({
     storage: storage,
     limits: { fileSize: fileSizeLimit },
-    fileFilter: function(req, file, cb) {
+    fileFilter: function (req, file, cb) {
         checkFileType(file, cb);
     }
 }).single('imageField')
@@ -82,9 +81,9 @@ app.post('/upload', (req, res) => {
 
             // If the file uploaded successfully
             else {
-
+                console.log(Date.now());
                 // Delete the file after one hour
-                setTimeout(function() {
+                setTimeout(function () {
                     fs.unlink(`public/uploads/${req.file.filename}`, (err) => {
                         if (err) {
                             console.error(err)
@@ -103,7 +102,7 @@ app.post('/upload', (req, res) => {
 
                 // Read image metadata, narrow down to only the date/time
                 try {
-                    new ExifImage({ image: picture }, function(error, exifData) {
+                    new ExifImage({ image: picture }, function (error, exifData) {
                         if (error) {
                             console.log(picture + ' | Error: ' + error.message);
                         } else
@@ -119,3 +118,4 @@ app.post('/upload', (req, res) => {
 
 // Listen on port 5000
 app.listen(process.env.PORT || 5000);
+console.log("Listening at http://127.0.0.1:5000");
