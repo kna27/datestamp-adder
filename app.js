@@ -48,6 +48,17 @@ function checkFileType(file, cb) {
     }
 }
 
+// Delete all files that have been uploaded
+fs.readdir(uploadsPath, (err, files) => {
+    if (err) throw err;
+
+    for (const file of files) {
+        fs.unlink(path.join(uploadsPath, file), err => {
+            if (err) throw err;
+        });
+    }
+});
+
 // Using express as the server
 const app = express();
 
