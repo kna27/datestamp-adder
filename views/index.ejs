@@ -29,6 +29,11 @@
     <br>
     <!-- The image that gets displayed to the user -->
     <img src="<%= typeof file != 'undefined' ? file : ''%>" class="responsive-img">
+    <div style="display:<%= typeof file == 'undefined' ? 'none' : 'inline'%>">
+        <a href="<%= typeof file != 'undefined' ? file : ''%>" download>
+            <button type="button">Download</button>
+        </a>
+    </div>
 </body>
 
 </html>
