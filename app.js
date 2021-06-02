@@ -11,10 +11,12 @@ const path = require('path');
 const fs = require('fs');
 var ExifImage = require('exif').ExifImage;
 const Jimp = require("jimp");
+const { diskStorage } = require('multer');
 
 var dateTaken;
 var fileName;
-var vertical = false;
+var rotateNeeded = false;
+
 
 // Name the uploaded files and state their destination 
 const storage = multer.diskStorage({
@@ -119,6 +121,23 @@ app.post('/upload', (req, res) => {
                         } else {
                             console.log(exifData.image.ModifyDate);
                             dateTaken = exifData.image.ModifyDate;
+                            if(exifData.image.Orientation == 6){
+                                rotateNeeded = true;
+                            }
+                            
+                            if (dateTaken == undefined) {
+                                res.render('index', {
+                                    msg: "Error: Cannot find metadata of the image."
+                                });
+                            }
+                            else {
+                                // format date better
+                                var date = dateTaken.split(" ")[0];
+                                var time = dateTaken.split(" ")[1];
+                                date = date.split(":");
+                                date = date[1] + "/" + date[2] + "/" + date[0];
+                                dateTaken = date + " " + time;
+                            }
                         }
                     });
                 } catch (error) {
@@ -131,19 +150,18 @@ app.post('/upload', (req, res) => {
                 Jimp.read(fileName)
                     .then(function (image) {
                         loadedImage = image;
-                        if (loadedImage.bitmap.width < loadedImage.bitmap.height) {
-                            vertical = true;
-                        }
                         return Jimp.loadFont('fonts/Roboto-Regular_Orange64.fnt');
                     })
                     .then(function (font) {
-                        loadedImage.print(font, loadedImage.bitmap.width * (3.0/4), loadedImage.bitmap.height * (15.5/16), dateTaken)  // print date on bottom right corner
-                            .write(fileName);
-                            if (vertical) {  // rotate the image if its vertical
-                                loadedImage.rotate(90) 
+                        loadedImage.print(font, loadedImage.bitmap.width - 700, loadedImage.bitmap.height * (15.5/16), dateTaken)  // print date on bottom right corner
+                            .write(fileName); 
+
+                        // make sure image is rotated correctly
+                        if (rotateNeeded) {
+                            loadedImage.rotate(90)
                                 .write(fileName);
-                                vertical = false;
-                            }
+                            rotateNeeded = false;
+                        }
 
                         res.render('index', {
                             msg: 'Datestamp Added!',
@@ -160,7 +178,7 @@ app.post('/upload', (req, res) => {
                 })
                 console.log(error);
             }
-
+            
         }
     })
 })
