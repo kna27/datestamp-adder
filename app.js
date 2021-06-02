@@ -14,6 +14,7 @@ const Jimp = require("jimp");
 
 var dateTaken;
 var fileName;
+var vertical = false;
 
 // Name the uploaded files and state their destination 
 const storage = multer.diskStorage({
@@ -130,11 +131,19 @@ app.post('/upload', (req, res) => {
                 Jimp.read(fileName)
                     .then(function (image) {
                         loadedImage = image;
+                        if (loadedImage.bitmap.width < loadedImage.bitmap.height) {
+                            vertical = true;
+                        }
                         return Jimp.loadFont('fonts/Roboto-Regular_Orange64.fnt');
                     })
                     .then(function (font) {
-                        loadedImage.print(font, loadedImage.bitmap.width/2, loadedImage.bitmap.height/2, dateTaken)
+                        loadedImage.print(font, loadedImage.bitmap.width * (3.0/4), loadedImage.bitmap.height * (15.5/16), dateTaken)  // print date on bottom right corner
                             .write(fileName);
+                            if (vertical) {  // rotate the image if its vertical
+                                loadedImage.rotate(90) 
+                                .write(fileName);
+                                vertical = false;
+                            }
 
                         res.render('index', {
                             msg: 'Datestamp Added!',
