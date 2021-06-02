@@ -12,6 +12,9 @@ const fs = require('fs');
 var ExifImage = require('exif').ExifImage;
 const Jimp = require("jimp");
 
+var dateTaken;
+var fileName;
+
 // Name the uploaded files and state their destination 
 const storage = multer.diskStorage({
     destination: uploadsPath,
@@ -92,10 +95,10 @@ app.post('/upload', (req, res) => {
 
             // If the file uploaded successfully
             else {
-                console.log(Date.now());
+                fileName = `public/uploads/${req.file.filename}`;
                 // Delete the file after one hour
                 setTimeout(function () {
-                    fs.unlink(`public/uploads/${req.file.filename}`, (err) => {
+                    fs.unlink(fileName, (err) => {
                         if (err) {
                             console.error(err)
                             return
@@ -104,25 +107,51 @@ app.post('/upload', (req, res) => {
                 }, fileLifeTime);
 
                 // Display the image on the website
-                res.render('index', {
-                    msg: 'File Uploaded!',
-                    file: `uploads/${req.file.filename}`
-                })
 
-                let picture = `public/uploads/${req.file.filename}`;
+                let picture = fileName;
 
                 // Read image metadata, narrow down to only the date/time
                 try {
                     new ExifImage({ image: picture }, function (error, exifData) {
                         if (error) {
                             console.log(picture + ' | Error: ' + error.message);
-                        } else
+                        } else {
                             console.log(exifData.image.ModifyDate);
+                            dateTaken = exifData.image.ModifyDate;
+                        }
                     });
                 } catch (error) {
                     console.log('Error: ' + error.message);
                 }
             }
+
+            // Add datestamp onto image
+            try {
+                Jimp.read(fileName)
+                    .then(function (image) {
+                        loadedImage = image;
+                        return Jimp.loadFont('fonts/Roboto-Regular_Orange64.fnt');
+                    })
+                    .then(function (font) {
+                        loadedImage.print(font, loadedImage.bitmap.width/2, loadedImage.bitmap.height/2, dateTaken)
+                            .write(fileName);
+
+                        res.render('index', {
+                            msg: 'Datestamp Added!',
+                            file: `uploads/${req.file.filename}`
+                        })
+                    })
+                    .catch(function (err) {
+                        console.error(err);
+                    });
+            }
+            catch (error) {
+                res.render('index', {
+                    msg: 'No metadata found on your image!',
+                })
+                console.log(error);
+            }
+
         }
     })
 })
