@@ -11,7 +11,6 @@ const path = require('path');
 const fs = require('fs');
 var ExifImage = require('exif').ExifImage;
 const Jimp = require("jimp");
-const { diskStorage } = require('multer');
 
 var dateTaken;
 var fileName;

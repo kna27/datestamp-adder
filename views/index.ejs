@@ -17,7 +17,7 @@
     <h2>Upload an image, and then a datestamp will get added</h2>
 
     <!-- The message that gets displayed about the status of the uploaded file -->
-    <%= typeof msg !='undefined' ? msg : '' %>
+    <p><%= typeof msg !='undefined' ? msg : '' %></p>
 
     <!-- The form buttons -->
     <form action="/upload" method="POST" enctype="multipart/form-data">
@@ -29,7 +29,7 @@
     <br>
     <!-- The image that gets displayed to the user -->
     <img src="<%= typeof file != 'undefined' ? file : ''%>" class="responsive-img">
-    <div style="display:<%= typeof file == 'undefined' ? 'none' : 'inline'%>">
+    <div style="display:<%= typeof file == 'undefined' ? 'none' : 'block'%>">
         <a href="<%= typeof file != 'undefined' ? file : ''%>" download>
             <button type="button">Download</button>
         </a>
