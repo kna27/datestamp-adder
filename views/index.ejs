@@ -23,7 +23,7 @@
     <!-- The form buttons -->
     <form action="/upload" method="POST" enctype="multipart/form-data">
         <!-- The file upload input -->
-        <input type="file" name="imageField" />
+        <input type="file" name="img" />
         <!-- The submit button -->
         <button type="submit">Submit</button>
     </form>
@@ -31,7 +31,7 @@
     <!-- The image that gets displayed to the user -->
     <img src="<%= typeof file != 'undefined' ? file : ''%>" class="responsive-img">
     <div style="display:<%= typeof file == 'undefined' ? 'none' : 'block'%>">
-        <a href="<%= typeof file != 'undefined' ? file : ''%>" download>
+        <a href="<%= typeof file != 'undefined' ? file : ''%>" download="img">
             <button type="button">Download</button>
         </a>
     </div>

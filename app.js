@@ -33,7 +33,7 @@ const upload = multer({
     fileFilter: function (req, file, cb) {
         checkFileType(file, cb);
     }
-}).single('imageField')
+}).single('img')
 
 // Only allow image files
 function checkFileType(file, cb) {
