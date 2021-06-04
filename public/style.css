@@ -17,14 +17,12 @@ p {
     font-size: 1.5em;
 }
 
-/* button {
-    background-color: #F64C72;
-    border: none;
-    color: white;
+button,
+.upload-img {
     padding: 3px 5px;
     text-align: center;
     font-size: 1.25em;
-} */
+}
 
 img[src=""] {
     display: none;
