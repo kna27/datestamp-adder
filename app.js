@@ -120,10 +120,10 @@ app.post('/upload', (req, res) => {
                         } else {
                             console.log(exifData.image.ModifyDate);
                             dateTaken = exifData.image.ModifyDate;
-                            if(exifData.image.Orientation == 6){
+                            if (exifData.image.Orientation == 6) {
                                 rotateNeeded = true;
                             }
-                            
+
                             if (dateTaken == undefined) {
                                 res.render('index', {
                                     msg: "Error: Cannot find metadata of the image."
@@ -152,8 +152,8 @@ app.post('/upload', (req, res) => {
                         return Jimp.loadFont('fonts/Roboto-Regular_Orange64.fnt');
                     })
                     .then(function (font) {
-                        loadedImage.print(font, loadedImage.bitmap.width - 700, loadedImage.bitmap.height * (15.5/16), dateTaken)  // print date on bottom right corner
-                            .write(fileName); 
+                        loadedImage.print(font, loadedImage.bitmap.width - 700, loadedImage.bitmap.height * (15.5 / 16), dateTaken)  // print date on bottom right corner
+                            .write(fileName);
 
                         // make sure image is rotated correctly
                         if (rotateNeeded) {
@@ -177,7 +177,6 @@ app.post('/upload', (req, res) => {
                 })
                 console.log(error);
             }
-            
         }
     })
 })
