@@ -2,6 +2,12 @@
 const fileSizeLimit = 10000000; // The limit on the file's size in bytes
 const fileLifeTime = 1000 * 60 * 60; // The time until the file is deleted from the server in milliseconds
 const uploadsPath = './public/uploads/';
+const positions = {
+    TOPLEFT: 0,
+    TOPRIGHT: 1,
+    BOTTOMLEFT: 2,
+    BOTTOMRIGHT: 3
+}
 
 // Dependencies
 const express = require('express');
@@ -15,7 +21,7 @@ const Jimp = require("jimp");
 var dateTaken;
 var fileName;
 var rotateNeeded = false;
-
+let position = positions.BOTTOMRIGHT;
 
 // Name the uploaded files and state their destination 
 const storage = multer.diskStorage({
@@ -152,8 +158,25 @@ app.post('/upload', (req, res) => {
                         return Jimp.loadFont('fonts/Roboto-Regular_Orange64.fnt');
                     })
                     .then(function (font) {
-                        loadedImage.print(font, loadedImage.bitmap.width - 700, loadedImage.bitmap.height * (15.5 / 16), dateTaken)  // print date on bottom right corner
-                            .write(fileName);
+                        console.log(position);
+                        switch (position) {
+                            case positions.TOPLEFT:
+                                loadedImage.print(font, Jimp.HORIZONTAL_ALIGN_LEFT, Jimp.VERTICAL_ALIGN_TOP, dateTaken)
+                                    .write(fileName);
+                                break;
+                            case positions.TOPRIGHT:
+                                loadedImage.print(font, Jimp.HORIZONTAL_ALIGN_RIGHT, Jimp.VERTICAL_ALIGN_TOP, dateTaken)
+                                    .write(fileName);
+                                break;
+                            case positions.BOTTOMLEFT:
+                                loadedImage.print(font, Jimp.HORIZONTAL_ALIGN_LEFT, Jimp.VERTICAL_ALIGN_BOTTOM, dateTaken)
+                                    .write(fileName);
+                                break;
+                            case positions.BOTTOMRIGHT:
+                                loadedImage.print(font, loadedImage.bitmap.width - Jimp.measureText(font, dateTaken), loadedImage.bitmap.height - Jimp.measureTextHeight(font, dateTaken), dateTaken)
+                                    .write(fileName);
+                                break;
+                        }
 
                         // make sure image is rotated correctly
                         if (rotateNeeded) {
