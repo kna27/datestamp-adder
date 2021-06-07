@@ -12,16 +12,15 @@ const positions = {
 // Dependencies
 const express = require('express');
 const multer = require('multer');
-const ejs = require('ejs');
 const path = require('path');
 const fs = require('fs');
 var ExifImage = require('exif').ExifImage;
-const Jimp = require("jimp");
+const Jimp = require('jimp');
 
 var dateTaken;
 var fileName;
 var rotateNeeded = false;
-let position = positions.BOTTOMRIGHT;
+var position = positions.BOTTOMRIGHT;
 
 // Name the uploaded files and state their destination 
 const storage = multer.diskStorage({
@@ -59,6 +58,23 @@ function checkFileType(file, cb) {
     }
 }
 
+function setPosition(pos) {
+    switch (pos) {
+        case "tl":
+            position = positions.TOPLEFT;
+            break;
+        case "tr":
+            position = positions.TOPRIGHT;
+            break;
+        case "bl":
+            position = positions.BOTTOMLEFT;
+            break;
+        case "br":
+            position = positions.BOTTOMRIGHT;
+            break;
+    }
+}
+
 // Delete all files that have been uploaded
 fs.readdir(uploadsPath, (err, files) => {
     if (err) throw err;
@@ -73,6 +89,11 @@ fs.readdir(uploadsPath, (err, files) => {
 // Using express as the server
 const app = express();
 
+app.use(express.json());
+app.use(express.urlencoded({
+    extended: true
+}));
+
 // Use ejs instead of HTML to display elements to the user
 app.set('view engine', 'ejs');
 
@@ -82,11 +103,10 @@ app.use(express.static(__dirname + '/public'));
 // Show the /views/index.ejs file to the user
 app.get('/', (req, res) => res.render('index'));
 
-
 // Uploading a file to the server
 app.post('/upload', (req, res) => {
     upload(req, res, (err) => {
-
+        setPosition(req.body.pos);
         // If there is an error
         if (err) {
             res.render('index', {
