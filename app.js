@@ -158,18 +158,17 @@ app.post('/upload', (req, res) => {
                         return Jimp.loadFont('fonts/Roboto-Regular_Orange64.fnt');
                     })
                     .then(function (font) {
-                        console.log(position);
                         switch (position) {
                             case positions.TOPLEFT:
-                                loadedImage.print(font, Jimp.HORIZONTAL_ALIGN_LEFT, Jimp.VERTICAL_ALIGN_TOP, dateTaken)
+                                loadedImage.print(font, 10, 10, dateTaken)
                                     .write(fileName);
                                 break;
                             case positions.TOPRIGHT:
-                                loadedImage.print(font, Jimp.HORIZONTAL_ALIGN_RIGHT, Jimp.VERTICAL_ALIGN_TOP, dateTaken)
+                                loadedImage.print(font, loadedImage.bitmap.width - Jimp.measureText(font, dateTaken), 10, dateTaken)
                                     .write(fileName);
                                 break;
                             case positions.BOTTOMLEFT:
-                                loadedImage.print(font, Jimp.HORIZONTAL_ALIGN_LEFT, Jimp.VERTICAL_ALIGN_BOTTOM, dateTaken)
+                                loadedImage.print(font, 10, loadedImage.bitmap.height - Jimp.measureTextHeight(font, dateTaken), dateTaken)
                                     .write(fileName);
                                 break;
                             case positions.BOTTOMRIGHT:
