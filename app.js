@@ -14,13 +14,14 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-var ExifImage = require('exif').ExifImage;
+const ExifImage = require('exif').ExifImage;
 const Jimp = require('jimp');
 
 var dateTaken;
 var fileName;
 var rotateNeeded = false;
 var position = positions.BOTTOMRIGHT;
+var font = 'fonts/Roboto-Regular_orange64.fnt';
 
 // Name the uploaded files and state their destination 
 const storage = multer.diskStorage({
@@ -75,6 +76,10 @@ function setPosition(pos) {
     }
 }
 
+function setFont(color, size) {
+    font = `fonts/Roboto-Regular_${color}${size}.fnt`;
+}
+
 // Delete all files that have been uploaded
 fs.readdir(uploadsPath, (err, files) => {
     if (err) throw err;
@@ -107,6 +112,7 @@ app.get('/', (req, res) => res.render('index'));
 app.post('/upload', (req, res) => {
     upload(req, res, (err) => {
         setPosition(req.body.pos);
+        setFont(req.body.color, req.body.fontsize);
         // If there is an error
         if (err) {
             res.render('index', {
@@ -129,7 +135,7 @@ app.post('/upload', (req, res) => {
                     fs.unlink(fileName, (err) => {
                         if (err) {
                             console.error(err)
-                            return
+                            return;
                         }
                     });
                 }, fileLifeTime);
@@ -175,7 +181,7 @@ app.post('/upload', (req, res) => {
                 Jimp.read(fileName)
                     .then(function (image) {
                         loadedImage = image;
-                        return Jimp.loadFont('fonts/Roboto-Regular_Orange64.fnt');
+                        return Jimp.loadFont(font);
                     })
                     .then(function (font) {
                         switch (position) {
