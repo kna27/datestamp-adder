@@ -40,6 +40,7 @@ var datestampedFileName;
 var rotateNeeded = false;
 var position = positions.BOTTOMRIGHT;
 var font = 'fonts/Roboto-Regular_orange64.fnt';
+var dateFormatType = "dateandtime12";
 
 // Only allow image files
 function checkFileType(file, cb) {
@@ -82,6 +83,32 @@ function setFont(color, size) {
     font = `fonts/Roboto-Regular_${color}${size}.fnt`;
 }
 
+// Format the date based on user selected option
+function formatDate() {
+    console.log(dateFormatType + " | " + dateTaken);
+    switch (dateFormatType) {
+        case "dateandtime12":
+            //todo    
+            break;
+        case "dateandtime24":
+            var date = dateTaken.split(" ")[0];
+            var time = dateTaken.split(" ")[1];
+            date = date.split(":");
+            date = date[1] + "/" + date[2] + "/" + date[0];
+            dateTaken = date + " " + time;
+            break;
+        case "date":
+            //todo
+            break;
+        case "time12":
+            //todo
+            break;
+        case "time24":
+            //todo
+            break;
+    }
+}
+
 // On startup, delete all files that have been uploaded
 fs.readdir(uploadsPath, (err, files) => {
     if (err) throw err;
@@ -111,6 +138,7 @@ app.post('/upload', (req, res) => {
         // Update position and font based on user selected options
         setPosition(req.body.pos);
         setFont(req.body.color, req.body.fontsize);
+        dateFormatType = req.body.dateformat;
 
         // If there is an error, show the message
         if (err) {
@@ -130,7 +158,7 @@ app.post('/upload', (req, res) => {
                     fileName = `public/uploads/${req.file.filename}`;
                     datestampedFileName = `public/uploads/stamped_${req.file.filename}`;
 
-                    // Delete the file after one hour
+                    // Delete the files after one hour
                     setTimeout(function () {
                         fs.unlink(fileName, (err) => {
                             if (err) {
@@ -138,40 +166,45 @@ app.post('/upload', (req, res) => {
                                 return;
                             }
                         });
+                        fs.unlink(datestampedFileName, (err) => {
+                            if (err) {
+                                console.error(err)
+                                return;
+                            }
+                        });
                     }, fileLifeTime);
+
                 }
 
                 let picture = fileName;
-
+                dateTaken = null;
                 // Read image metadata, narrow down to only the date/time
                 try {
                     new ExifImage({ image: picture }, function (error, exifData) {
                         if (error) {
                             console.log(picture + ' | Error: ' + error.message);
+                            
+                            dateTaken = "⠀";
                         } else {
-                            console.log(exifData.image.ModifyDate);
-                            dateTaken = exifData.image.ModifyDate;
+                            dateTaken = exifData.image.ModifyDate != undefined ? exifData.image.ModifyDate : "⠀";
                             if (exifData.image.Orientation == 6) {
                                 rotateNeeded = true;
                             }
 
-                            if (dateTaken == undefined) {
-                                res.render('index', {
-                                    msg: "Error: Cannot find metadata of the image."
-                                });
-                            }
                             else {
                                 // Format date better
-                                var date = dateTaken.split(" ")[0];
-                                var time = dateTaken.split(" ")[1];
-                                date = date.split(":");
-                                date = date[1] + "/" + date[2] + "/" + date[0];
-                                dateTaken = date + " " + time;
+                                if (dateTaken != "⠀") {
+                                    formatDate();
+                                }
                             }
                         }
                     });
                 } catch (error) {
                     console.log('Error: ' + error.message);
+                    dateTaken = "⠀";
+                    res.render('index', {
+                        msg: "Error: Cannot find metadata of the image."
+                    });
                 }
 
                 // Add datestamp onto image
@@ -210,7 +243,7 @@ app.post('/upload', (req, res) => {
 
                             // Show image on the webpage
                             res.render('index', {
-                                msg: 'Datestamp Added!',
+                                msg: dateTaken == "⠀" ? "No metadata found on your image!" : "Datestamp added!",
                                 file: `uploads/${path.basename(datestampedFileName)}`
                             })
                         })
