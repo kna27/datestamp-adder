@@ -91,12 +91,16 @@ function formatDate() {
     date = date.split(":");
     date = date[1] + "/" + date[2] + "/" + date[0];
 
+    var ending = ' AM';
     var time12hr = time.split(":");
+    if (time12hr[0] >= 12) {
+        ending = ' PM';
+    }
     time12hr[0] = time12hr[0] % 12;
     if (time12hr[0] == 0) {
         time12hr[0] == 12;
     }
-    time12hr = time12hr.join(":");
+    time12hr = time12hr.join(":") + ending;
     switch (dateFormatType) {
         case "dateandtime12":
             dateTaken = date + " " + time12hr;   
