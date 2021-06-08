@@ -198,12 +198,11 @@ app.post('/upload', (req, res) => {
                                 rotateNeeded = true;
                             }
 
-                            else {
-                                // Format date better
-                                if (dateTaken != "⠀") {
-                                    formatDate();
-                                }
+                            // Format date better
+                            if (dateTaken != "⠀") {
+                                formatDate();
                             }
+                        
                         }
                     });
                 } catch (error) {
@@ -244,7 +243,7 @@ app.post('/upload', (req, res) => {
                             // Make sure image is rotated correctly
                             if (rotateNeeded) {
                                 loadedImage.rotate(90)
-                                    .write(fileName);
+                                    .write(datestampedFileName);
                                 rotateNeeded = false;
                             }
 
