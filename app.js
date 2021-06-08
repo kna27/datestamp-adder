@@ -1,3 +1,11 @@
+// Dependencies
+const express = require('express');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+const ExifImage = require('exif').ExifImage;
+const Jimp = require('jimp');
+
 // Constants
 const fileSizeLimit = 10000000; // The limit on the file's size in bytes
 const fileLifeTime = 1000 * 60 * 60; // The time until the file is deleted from the server in milliseconds
@@ -8,21 +16,6 @@ const positions = {
     BOTTOMLEFT: 2,
     BOTTOMRIGHT: 3
 }
-
-// Dependencies
-const express = require('express');
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
-const ExifImage = require('exif').ExifImage;
-const Jimp = require('jimp');
-
-var dateTaken;
-var fileName;
-var rotateNeeded = false;
-var position = positions.BOTTOMRIGHT;
-var font = 'fonts/Roboto-Regular_orange64.fnt';
-
 // Name the uploaded files and state their destination 
 const storage = multer.diskStorage({
     destination: uploadsPath,
@@ -31,7 +24,6 @@ const storage = multer.diskStorage({
         cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
     }
 })
-
 // State the max file size
 const upload = multer({
     storage: storage,
@@ -40,6 +32,14 @@ const upload = multer({
         checkFileType(file, cb);
     }
 }).single('img')
+
+// Variables
+var dateTaken;
+var fileName;
+var datestampedFileName;
+var rotateNeeded = false;
+var position = positions.BOTTOMRIGHT;
+var font = 'fonts/Roboto-Regular_orange64.fnt';
 
 // Only allow image files
 function checkFileType(file, cb) {
@@ -59,6 +59,7 @@ function checkFileType(file, cb) {
     }
 }
 
+// Set the position based on user selected option
 function setPosition(pos) {
     switch (pos) {
         case "tl":
@@ -76,11 +77,12 @@ function setPosition(pos) {
     }
 }
 
+// Set the font based on user selected options
 function setFont(color, size) {
     font = `fonts/Roboto-Regular_${color}${size}.fnt`;
 }
 
-// Delete all files that have been uploaded
+// On startup, delete all files that have been uploaded
 fs.readdir(uploadsPath, (err, files) => {
     if (err) throw err;
 
@@ -94,11 +96,6 @@ fs.readdir(uploadsPath, (err, files) => {
 // Using express as the server
 const app = express();
 
-app.use(express.json());
-app.use(express.urlencoded({
-    extended: true
-}));
-
 // Use ejs instead of HTML to display elements to the user
 app.set('view engine', 'ejs');
 
@@ -111,36 +108,38 @@ app.get('/', (req, res) => res.render('index'));
 // Uploading a file to the server
 app.post('/upload', (req, res) => {
     upload(req, res, (err) => {
+        // Update position and font based on user selected options
         setPosition(req.body.pos);
         setFont(req.body.color, req.body.fontsize);
-        // If there is an error
+
+        // If there is an error, show the message
         if (err) {
             res.render('index', {
                 msg: err
             });
         } else {
-
-            // If the user didn't upload a file
-            if (req.file == undefined) {
+            // If the user didn't upload a file and hasn't uploaded one in the past
+            if (fileName == undefined && req.file == undefined) {
                 res.render('index', {
                     msg: "Error: Upload a file first!"
                 });
             }
-
             // If the file uploaded successfully
             else {
-                fileName = `public/uploads/${req.file.filename}`;
-                // Delete the file after one hour
-                setTimeout(function () {
-                    fs.unlink(fileName, (err) => {
-                        if (err) {
-                            console.error(err)
-                            return;
-                        }
-                    });
-                }, fileLifeTime);
+                if (req.file != undefined) {
+                    fileName = `public/uploads/${req.file.filename}`;
+                    datestampedFileName = `public/uploads/stamped_${req.file.filename}`;
 
-                // Display the image on the website
+                    // Delete the file after one hour
+                    setTimeout(function () {
+                        fs.unlink(fileName, (err) => {
+                            if (err) {
+                                console.error(err)
+                                return;
+                            }
+                        });
+                    }, fileLifeTime);
+                }
 
                 let picture = fileName;
 
@@ -162,7 +161,7 @@ app.post('/upload', (req, res) => {
                                 });
                             }
                             else {
-                                // format date better
+                                // Format date better
                                 var date = dateTaken.split(" ")[0];
                                 var time = dateTaken.split(" ")[1];
                                 date = date.split(":");
@@ -174,56 +173,57 @@ app.post('/upload', (req, res) => {
                 } catch (error) {
                     console.log('Error: ' + error.message);
                 }
-            }
 
-            // Add datestamp onto image
-            try {
-                Jimp.read(fileName)
-                    .then(function (image) {
-                        loadedImage = image;
-                        return Jimp.loadFont(font);
-                    })
-                    .then(function (font) {
-                        switch (position) {
-                            case positions.TOPLEFT:
-                                loadedImage.print(font, 10, 10, dateTaken)
-                                    .write(fileName);
-                                break;
-                            case positions.TOPRIGHT:
-                                loadedImage.print(font, loadedImage.bitmap.width - Jimp.measureText(font, dateTaken), 10, dateTaken)
-                                    .write(fileName);
-                                break;
-                            case positions.BOTTOMLEFT:
-                                loadedImage.print(font, 10, loadedImage.bitmap.height - Jimp.measureTextHeight(font, dateTaken), dateTaken)
-                                    .write(fileName);
-                                break;
-                            case positions.BOTTOMRIGHT:
-                                loadedImage.print(font, loadedImage.bitmap.width - Jimp.measureText(font, dateTaken), loadedImage.bitmap.height - Jimp.measureTextHeight(font, dateTaken), dateTaken)
-                                    .write(fileName);
-                                break;
-                        }
-
-                        // make sure image is rotated correctly
-                        if (rotateNeeded) {
-                            loadedImage.rotate(90)
-                                .write(fileName);
-                            rotateNeeded = false;
-                        }
-
-                        res.render('index', {
-                            msg: 'Datestamp Added!',
-                            file: `uploads/${req.file.filename}`
+                // Add datestamp onto image
+                try {
+                    Jimp.read(fileName)
+                        .then(function (image) {
+                            loadedImage = image;
+                            return Jimp.loadFont(font);
                         })
+                        .then(function (font) {
+                            switch (position) {
+                                case positions.TOPLEFT:
+                                    loadedImage.print(font, 10, 10, dateTaken)
+                                        .write(datestampedFileName);
+                                    break;
+                                case positions.TOPRIGHT:
+                                    loadedImage.print(font, loadedImage.bitmap.width - Jimp.measureText(font, dateTaken), 10, dateTaken)
+                                        .write(datestampedFileName);
+                                    break;
+                                case positions.BOTTOMLEFT:
+                                    loadedImage.print(font, 10, loadedImage.bitmap.height - Jimp.measureTextHeight(font, dateTaken), dateTaken)
+                                        .write(datestampedFileName);
+                                    break;
+                                case positions.BOTTOMRIGHT:
+                                    loadedImage.print(font, loadedImage.bitmap.width - Jimp.measureText(font, dateTaken), loadedImage.bitmap.height - Jimp.measureTextHeight(font, dateTaken), dateTaken)
+                                        .write(datestampedFileName);
+                                    break;
+                            }
+
+                            // Make sure image is rotated correctly
+                            if (rotateNeeded) {
+                                loadedImage.rotate(90)
+                                    .write(fileName);
+                                rotateNeeded = false;
+                            }
+
+                            // Show image on the webpage
+                            res.render('index', {
+                                msg: 'Datestamp Added!',
+                                file: `uploads/${path.basename(datestampedFileName)}`
+                            })
+                        })
+                        .catch(function (err) {
+                            console.error(err);
+                        });
+                }
+                catch (error) {
+                    res.render('index', {
+                        msg: 'No metadata found on your image!',
                     })
-                    .catch(function (err) {
-                        console.error(err);
-                    });
-            }
-            catch (error) {
-                res.render('index', {
-                    msg: 'No metadata found on your image!',
-                })
-                console.log(error);
+                    console.log(error);
+                }
             }
         }
     })
