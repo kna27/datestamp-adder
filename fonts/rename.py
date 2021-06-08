@@ -7,9 +7,12 @@
 import os
 
 PATH = os.path.dirname(os.path.realpath(__file__))
+
+# Make sure to change these variables, otherwise the script won't work!
 color = "black"
 fntSize = 128
 fntName = "Roboto-Regular"
+
 for filename in os.listdir(PATH):
     if filename.startswith(fntName + ".ttf_"):
         num = filename[-5]
