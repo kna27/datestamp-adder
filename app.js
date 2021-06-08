@@ -191,15 +191,15 @@ app.post('/upload', (req, res) => {
                         if (error) {
                             console.log(picture + ' | Error: ' + error.message);
                             
-                            dateTaken = "⠀";
+                            dateTaken = " ";
                         } else {
-                            dateTaken = exifData.image.ModifyDate != undefined ? exifData.image.ModifyDate : "⠀";
+                            dateTaken = exifData.image.ModifyDate != undefined ? exifData.image.ModifyDate : " ";
                             if (exifData.image.Orientation == 6) {
                                 rotateNeeded = true;
                             }
 
                             // Format date better
-                            if (dateTaken != "⠀") {
+                            if (dateTaken != " ") {
                                 formatDate();
                             }
                         
@@ -207,7 +207,7 @@ app.post('/upload', (req, res) => {
                     });
                 } catch (error) {
                     console.log('Error: ' + error.message);
-                    dateTaken = "⠀";
+                    dateTaken = " ";
                     res.render('index', {
                         msg: "Error: Cannot find metadata of the image."
                     });
@@ -248,9 +248,10 @@ app.post('/upload', (req, res) => {
                             }
 
                             // Show image on the webpage
+                            console.log(dateTaken);
                             res.render('index', {
-                                msg: dateTaken == "⠀" ? "No metadata found on your image!" : "Datestamp added!",
-                                file: `uploads/${path.basename(datestampedFileName)}`
+                                msg: dateTaken == " " ? "No metadata found on your image!" : "Datestamp added!",
+                                file: dateTaken == " " ? undefined : `uploads/${path.basename(datestampedFileName)}`
                             })
                         })
                         .catch(function (err) {
