@@ -52,7 +52,7 @@ function checkFileType(file, cb) {
     if (minetype && extname) {
         return cb(null, true);
     } else {
-        if (path.extname(file.originalname) == ".png") {
+        if (path.extname(file.originalname) == ".png" || path.extname(file.originalname) == ".jfif") {
             cb("Error: only JPG and JPEG files are supported!");
         } else {
             cb("Error: Images Only!");
@@ -86,25 +86,32 @@ function setFont(color, size) {
 // Format the date based on user selected option
 function formatDate() {
     console.log(dateFormatType + " | " + dateTaken);
+    var date = dateTaken.split(" ")[0];
+    var time = dateTaken.split(" ")[1];
+    date = date.split(":");
+    date = date[1] + "/" + date[2] + "/" + date[0];
+
+    var time12hr = time.split(":");
+    time12hr[0] = time12hr[0] % 12;
+    if (time12hr[0] == 0) {
+        time12hr[0] == 12;
+    }
+    time12hr = time12hr.join(":");
     switch (dateFormatType) {
         case "dateandtime12":
-            //todo    
+            dateTaken = date + " " + time12hr;   
             break;
         case "dateandtime24":
-            var date = dateTaken.split(" ")[0];
-            var time = dateTaken.split(" ")[1];
-            date = date.split(":");
-            date = date[1] + "/" + date[2] + "/" + date[0];
             dateTaken = date + " " + time;
             break;
         case "date":
-            //todo
+            dateTaken = date;
             break;
         case "time12":
-            //todo
+            dateTaken = time12hr;
             break;
         case "time24":
-            //todo
+            dateTaken = time;
             break;
     }
 }
