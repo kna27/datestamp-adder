@@ -103,7 +103,7 @@ function formatDate() {
     time12hr = time12hr.join(":") + ending;
     switch (dateFormatType) {
         case "dateandtime12":
-            dateTaken = date + " " + time12hr;   
+            dateTaken = date + " " + time12hr;
             break;
         case "dateandtime24":
             dateTaken = date + " " + time;
@@ -184,7 +184,6 @@ app.post('/upload', (req, res) => {
                             }
                         });
                     }, fileLifeTime);
-
                 }
 
                 let picture = fileName;
@@ -194,7 +193,6 @@ app.post('/upload', (req, res) => {
                     new ExifImage({ image: picture }, function (error, exifData) {
                         if (error) {
                             console.log(picture + ' | Error: ' + error.message);
-                            
                             dateTaken = " ";
                         } else {
                             dateTaken = exifData.image.ModifyDate != undefined ? exifData.image.ModifyDate : " ";
@@ -206,7 +204,6 @@ app.post('/upload', (req, res) => {
                             if (dateTaken != " ") {
                                 formatDate();
                             }
-                        
                         }
                     });
                 } catch (error) {
@@ -252,7 +249,6 @@ app.post('/upload', (req, res) => {
                             }
 
                             // Show image on the webpage
-                            console.log(dateTaken);
                             res.render('index', {
                                 msg: dateTaken == " " ? "No metadata found on your image!" : "Datestamp added!",
                                 file: dateTaken == " " ? undefined : `uploads/${path.basename(datestampedFileName)}`
