@@ -8,7 +8,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1.0" />
     <meta name="description" content="Add original datestamp to picture/image from metadata.">
-    <link rel="icon" type="image/png" href="icon.png"/>
+    <link rel="icon" type="image/png" href="icon.png" />
     <title>Datestamp Adder</title>
     <link href="https://fonts.googleapis.com/css2?family=Oxygen:wght@300&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
@@ -19,12 +19,14 @@
     <h2>Upload an image, and then a datestamp will get added</h2>
 
     <!-- The message that gets displayed about the status of the uploaded file -->
-    <p><%= typeof msg !='undefined' ? msg : '' %></p>
+    <p>
+        <%= typeof msg !='undefined' ? msg : '' %>
+    </p>
 
     <!-- The form buttons -->
     <form action="/upload" method="POST" enctype="multipart/form-data">
         <!-- The file upload input -->
-        <input type="file" name="img" class="upload-img"/>
+        <input type="file" name="img" class="upload-img" />
         <!-- The submit button -->
         <button type="submit" id="submit">Submit</button>
 
