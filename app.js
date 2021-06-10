@@ -288,8 +288,18 @@ app.post('/upload', (req, res) => {
                 }
             }
         }
-    })
-})
+    });
+});
+
+app.get("/about", (req, res) => {
+    res.render('about', {
+        uploadcount: uploadCount
+    });
+});
+
+app.get("/home", (req, res) => {
+    res.render('index');
+});
 
 // Listen on port 5000
 app.listen(process.env.PORT || 5000);
