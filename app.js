@@ -41,6 +41,27 @@ var rotateNeeded = false;
 var position = positions.BOTTOMRIGHT;
 var font = 'fonts/Roboto-Regular_orange64.fnt';
 var dateFormatType = "dateandtime12";
+var uploadCount;
+
+fs.readFile("./uploads", "utf8", (err, data) => {
+    if (err) {
+        console.error(err);
+        uploadCount = 0;
+        return;
+    }
+    uploadCount = data;
+})
+
+function updateUploadCount() {
+    uploadCount++;
+    console.log(`Uploads: ${uploadCount}`);
+    fs.writeFile("./uploads", uploadCount.toString(), err => {
+        if (err) {
+            console.error(err);
+            return;
+        }
+    })
+}
 
 // Only allow image files
 function checkFileType(file, cb) {
@@ -85,7 +106,6 @@ function setFont(color, size) {
 
 // Format the date based on user selected option
 function formatDate() {
-    console.log(dateFormatType + " | " + dateTaken);
     var date = dateTaken.split(" ")[0];
     var time = dateTaken.split(" ")[1];
     date = date.split(":");
@@ -185,6 +205,8 @@ app.post('/upload', (req, res) => {
                         });
                     }, fileLifeTime);
                 }
+
+                updateUploadCount();
 
                 let picture = fileName;
                 dateTaken = null;
