@@ -21,7 +21,7 @@
 
     <h1>About</h1>
     <h2>Upload an image, and then a datestamp will get added</h2>
-    <h2>Total Uploads: <%= typeof uploadcount !='undefined' ? uploadcount : '' %>
+    <h2 id="uploadcounts">Total Uploads: <%= typeof uploadcount !='undefined' ? uploadcount : '' %>
     </h2>
     <p>About text! Very descriptive! Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse auctor
         vehicula quam. Quisque ligula metus, cursus quis odio id, lacinia efficitur dolor. Suspendisse odio ipsum,
@@ -30,5 +30,7 @@
     <br>
     <!-- The image that gets displayed to the user -->
 </body>
+
+<script src="counter.js"></script>
 
 </html>
