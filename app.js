@@ -23,7 +23,7 @@ const storage = multer.diskStorage({
         // Add the current date to the image's name to prevent conflicting files
         cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
     }
-})
+});
 // State the max file size
 const upload = multer({
     storage: storage,
@@ -31,7 +31,7 @@ const upload = multer({
     fileFilter: function (req, file, cb) {
         checkFileType(file, cb);
     }
-}).single('img')
+}).single('img');
 
 // Variables
 var dateTaken;
@@ -50,24 +50,23 @@ fs.readFile("./uploads", "utf8", (err, data) => {
         return;
     }
     uploadCount = data;
-})
+});
 
 function updateUploadCount() {
     uploadCount++;
-    console.log(`Uploads: ${uploadCount}`);
+    console.log(`Uploads: ${uploadCount}`); // Do not delete this, it can be useful for recovery
     fs.writeFile("./uploads", uploadCount.toString(), err => {
         if (err) {
             console.error(err);
             return;
         }
-    })
+    });
 }
 
 // Only allow image files
 function checkFileType(file, cb) {
     const filetypes = /jpeg|jpg/;
     const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-
     const minetype = filetypes.test(file.mimetype);
 
     if (minetype && extname) {
@@ -274,7 +273,7 @@ app.post('/upload', (req, res) => {
                             res.render('index', {
                                 msg: dateTaken == " " ? "No metadata found on your image!" : "Datestamp added!",
                                 file: dateTaken == " " ? undefined : `uploads/${path.basename(datestampedFileName)}`
-                            })
+                            });
                         })
                         .catch(function (err) {
                             console.error(err);
@@ -283,7 +282,7 @@ app.post('/upload', (req, res) => {
                 catch (error) {
                     res.render('index', {
                         msg: 'No metadata found on your image!',
-                    })
+                    });
                     console.log(error);
                 }
             }
