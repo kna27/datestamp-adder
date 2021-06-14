@@ -7,25 +7,32 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1.0" />
-    <link rel="icon" type="image/png" href="icon.png"/>
+    <meta name="description" content="Add original datestamp to picture/image from metadata.">
+    <link rel="icon" type="image/png" href="icon.png" />
     <title>Datestamp Adder</title>
     <link href="https://fonts.googleapis.com/css2?family=Oxygen:wght@300&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
+    <header>
+        <a href="/about">About</a>
+    </header>
+
     <h1>Datestamp Adder</h1>
     <h2>Upload an image, and then a datestamp will get added</h2>
 
     <!-- The message that gets displayed about the status of the uploaded file -->
-    <p><%= typeof msg !='undefined' ? msg : '' %></p>
+    <p>
+        <%= typeof msg !='undefined' ? msg : '' %>
+    </p>
 
     <!-- The form buttons -->
     <form action="/upload" method="POST" enctype="multipart/form-data">
         <!-- The file upload input -->
-        <input type="file" name="img" class="upload-img"/>
+        <input type="file" name="img" class="upload-img" />
         <!-- The submit button -->
-        <button type="submit">Submit</button>
+        <button type="submit" id="submit">Submit</button>
 
         <h3>Datestamp Position</h3>
         <input type="radio" id="tl" name="pos" value="tl">
@@ -47,6 +54,7 @@
             <option value="32">32</option>
             <option value="64" selected>64</option>
             <option value="128">128</option>
+            <option value="200">200</option>
         </select>
         <select name="dateformat" id="dateformat">
             <option value="dateandtime12" selected>Date and Time (12hr)</option>
@@ -65,5 +73,7 @@
         </a>
     </div>
 </body>
+
+<script src="formStorage.js"></script>
 
 </html>

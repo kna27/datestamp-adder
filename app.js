@@ -23,7 +23,7 @@ const storage = multer.diskStorage({
         // Add the current date to the image's name to prevent conflicting files
         cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
     }
-})
+});
 // State the max file size
 const upload = multer({
     storage: storage,
@@ -31,7 +31,7 @@ const upload = multer({
     fileFilter: function (req, file, cb) {
         checkFileType(file, cb);
     }
-}).single('img')
+}).single('img');
 
 // Variables
 var dateTaken;
@@ -41,12 +41,32 @@ var rotateNeeded = false;
 var position = positions.BOTTOMRIGHT;
 var font = 'fonts/Roboto-Regular_orange64.fnt';
 var dateFormatType = "dateandtime12";
+var uploadCount;
+
+fs.readFile("./uploads", "utf8", (err, data) => {
+    if (err) {
+        console.error(err);
+        uploadCount = 0;
+        return;
+    }
+    uploadCount = data;
+});
+
+function updateUploadCount() {
+    uploadCount++;
+    console.log(`Uploads: ${uploadCount}`); // Do not delete this, it can be useful for recovery
+    fs.writeFile("./uploads", uploadCount.toString(), err => {
+        if (err) {
+            console.error(err);
+            return;
+        }
+    });
+}
 
 // Only allow image files
 function checkFileType(file, cb) {
     const filetypes = /jpeg|jpg/;
     const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-
     const minetype = filetypes.test(file.mimetype);
 
     if (minetype && extname) {
@@ -85,7 +105,6 @@ function setFont(color, size) {
 
 // Format the date based on user selected option
 function formatDate() {
-    console.log(dateFormatType + " | " + dateTaken);
     var date = dateTaken.split(" ")[0];
     var time = dateTaken.split(" ")[1];
     date = date.split(":");
@@ -103,7 +122,7 @@ function formatDate() {
     time12hr = time12hr.join(":") + ending;
     switch (dateFormatType) {
         case "dateandtime12":
-            dateTaken = date + " " + time12hr;   
+            dateTaken = date + " " + time12hr;
             break;
         case "dateandtime24":
             dateTaken = date + " " + time;
@@ -184,8 +203,9 @@ app.post('/upload', (req, res) => {
                             }
                         });
                     }, fileLifeTime);
-
                 }
+
+                updateUploadCount();
 
                 let picture = fileName;
                 dateTaken = null;
@@ -194,7 +214,6 @@ app.post('/upload', (req, res) => {
                     new ExifImage({ image: picture }, function (error, exifData) {
                         if (error) {
                             console.log(picture + ' | Error: ' + error.message);
-                            
                             dateTaken = " ";
                         } else {
                             dateTaken = exifData.image.ModifyDate != undefined ? exifData.image.ModifyDate : " ";
@@ -206,7 +225,6 @@ app.post('/upload', (req, res) => {
                             if (dateTaken != " ") {
                                 formatDate();
                             }
-                        
                         }
                     });
                 } catch (error) {
@@ -252,11 +270,10 @@ app.post('/upload', (req, res) => {
                             }
 
                             // Show image on the webpage
-                            console.log(dateTaken);
                             res.render('index', {
                                 msg: dateTaken == " " ? "No metadata found on your image!" : "Datestamp added!",
                                 file: dateTaken == " " ? undefined : `uploads/${path.basename(datestampedFileName)}`
-                            })
+                            });
                         })
                         .catch(function (err) {
                             console.error(err);
@@ -265,13 +282,23 @@ app.post('/upload', (req, res) => {
                 catch (error) {
                     res.render('index', {
                         msg: 'No metadata found on your image!',
-                    })
+                    });
                     console.log(error);
                 }
             }
         }
-    })
-})
+    });
+});
+
+app.get("/about", (req, res) => {
+    res.render('about', {
+        uploadcount: uploadCount
+    });
+});
+
+app.get("/home", (req, res) => {
+    res.render('index');
+});
 
 // Listen on port 5000
 app.listen(process.env.PORT || 5000);
