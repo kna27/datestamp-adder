@@ -21,14 +21,17 @@
 
     <h1>About</h1>
     <h2>Upload an image, and then a datestamp will get added</h2>
-    <h2 id="uploadcounts">Total Uploads: <%= typeof uploadcount !='undefined' ? uploadcount : '' %>
+    <h2 style="visibility: hidden" id="uploadcounts">Total Uploads Worldwide: <%= typeof uploadcount !='undefined' ? uploadcount : '' %>
     </h2>
-    <p>About text! Very descriptive! Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse auctor
-        vehicula quam. Quisque ligula metus, cursus quis odio id, lacinia efficitur dolor. Suspendisse odio ipsum,
-        aliquam et tincidunt sit amet, venenatis quis augue. Nulla at justo quis risus posuere vulputate vel id sapien.
-        Praesent eu dui tincidunt, ultricies lacus sit. </p>
+    <p>Automatically add a datestamp to your image using the date it was taken. You are able to customize the 
+        color, font size, date format, and the position of the datestamp. Want to customize an image you 
+        already uploaded? No problem, simply change the settings you want and hit the upload button again!</p>
+    <p>This website was made by <a href="https://github.com/kna27" target="_blank">Krish Arora</a> 
+        and <a href="https://github.com/azhang45" target="_blank">Alice Zhang</a> for the Intro 
+        to Computer Science end of year project.</p>
+    <p><a href="https://github.com/kna27/datestamp-adder" target="_blank">GitHub Repo</a></p>
     <br>
-    <!-- The image that gets displayed to the user -->
+    <h2><a href="/home">Upload an Image</a></h2>
 </body>
 
 <script src="counter.js"></script>
