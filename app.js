@@ -1,6 +1,7 @@
 // Dependencies
 const express = require('express');
 const multer = require('multer');
+const cookieParser = require('cookie-parser');
 const path = require('path');
 const fs = require('fs');
 const ExifImage = require('exif').ExifImage;
@@ -159,6 +160,9 @@ app.set('view engine', 'ejs');
 // Serve everything in the /public folder
 app.use(express.static(__dirname + '/public'));
 
+// Use cookie parser
+app.use(cookieParser());
+
 // Show the /views/index.ejs file to the user
 app.get('/', (req, res) => res.render('index'));
 
@@ -177,7 +181,7 @@ app.post('/upload', (req, res) => {
             });
         } else {
             // If the user didn't upload a file and hasn't uploaded one in the past
-            if (fileName == undefined && req.file == undefined) {
+            if (req.cookies.fileName == undefined && req.file == undefined) {
                 res.render('index', {
                     msg: "Error: Upload a file first!"
                 });
@@ -187,7 +191,10 @@ app.post('/upload', (req, res) => {
                 if (req.file != undefined) {
                     fileName = `public/uploads/${req.file.filename}`;
                     datestampedFileName = `public/uploads/stamped_${req.file.filename}`;
+                    res.cookie("fileName", fileName);
+                    res.cookie("datestampedFileName", datestampedFileName);
 
+                    console.log(fileName + "   |   " + req.file != undefined ? `public/uploads/${req.file.filename}` : req.cookies.fileName);
                     // Delete the files after one hour
                     setTimeout(function () {
                         fs.unlink(fileName, (err) => {
@@ -207,13 +214,12 @@ app.post('/upload', (req, res) => {
 
                 updateUploadCount();
 
-                let picture = fileName;
                 dateTaken = null;
                 // Read image metadata, narrow down to only the date/time
                 try {
-                    new ExifImage({ image: picture }, function (error, exifData) {
+                    new ExifImage({ image: req.file != undefined ? `public/uploads/${req.file.filename}` : req.cookies.fileName }, function (error, exifData) {
                         if (error) {
-                            console.log(picture + ' | Error: ' + error.message);
+                            console.log(req.file != undefined ? `public/uploads/${req.file.filename}` : req.cookies.fileName + ' | Error: ' + error.message);
                             dateTaken = " ";
                         } else {
                             dateTaken = exifData.image.ModifyDate != undefined ? exifData.image.ModifyDate : " ";
@@ -237,7 +243,7 @@ app.post('/upload', (req, res) => {
 
                 // Add datestamp onto image
                 try {
-                    Jimp.read(fileName)
+                    Jimp.read(req.file != undefined ? `public/uploads/${req.file.filename}` : req.cookies.fileName)
                         .then(function (image) {
                             loadedImage = image;
                             return Jimp.loadFont(font);
@@ -246,33 +252,33 @@ app.post('/upload', (req, res) => {
                             switch (position) {
                                 case positions.TOPLEFT:
                                     loadedImage.print(font, 10, 10, dateTaken)
-                                        .write(datestampedFileName);
+                                        .write(req.file != undefined ? `public/uploads/stamped_${req.file.filename}` : req.cookies.datestampedFileName);
                                     break;
                                 case positions.TOPRIGHT:
                                     loadedImage.print(font, loadedImage.bitmap.width - Jimp.measureText(font, dateTaken), 10, dateTaken)
-                                        .write(datestampedFileName);
+                                        .write(req.file != undefined ? `public/uploads/stamped_${req.file.filename}` : req.cookies.datestampedFileName);
                                     break;
                                 case positions.BOTTOMLEFT:
                                     loadedImage.print(font, 10, loadedImage.bitmap.height - Jimp.measureTextHeight(font, dateTaken), dateTaken)
-                                        .write(datestampedFileName);
+                                        .write(req.file != undefined ? `public/uploads/stamped_${req.file.filename}` : req.cookies.datestampedFileName);
                                     break;
                                 case positions.BOTTOMRIGHT:
                                     loadedImage.print(font, loadedImage.bitmap.width - Jimp.measureText(font, dateTaken), loadedImage.bitmap.height - Jimp.measureTextHeight(font, dateTaken), dateTaken)
-                                        .write(datestampedFileName);
+                                        .write(req.file != undefined ? `public/uploads/stamped_${req.file.filename}` : req.cookies.datestampedFileName);
                                     break;
                             }
 
                             // Make sure image is rotated correctly
                             if (rotateNeeded) {
                                 loadedImage.rotate(90)
-                                    .write(datestampedFileName);
+                                    .write(req.file != undefined ? `public/uploads/stamped_${req.file.filename}` : req.cookies.datestampedFileName);
                                 rotateNeeded = false;
                             }
 
                             // Show image on the webpage
                             res.render('index', {
                                 msg: dateTaken == " " ? "No metadata found on your image!" : "Datestamp added!",
-                                file: dateTaken == " " ? undefined : `uploads/${path.basename(datestampedFileName)}`
+                                file: dateTaken == " " ? undefined : req.file != undefined ? `uploads/${path.basename(`public/uploads/stamped_${req.file.filename}`)}` : `uploads/${path.basename(req.cookies.datestampedFileName)}`
                             });
                         })
                         .catch(function (err) {
